@@ -1,0 +1,10 @@
+# Turn on the RewriteEngine
+RewriteEngine On
+
+# Set the base directory for the app
+RewriteBase /
+
+# Redirect requests to the index.php file
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . index.php [L]
