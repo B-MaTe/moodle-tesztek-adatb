@@ -1,0 +1,27 @@
+a {
+    text-decoration: none;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    height: 100vh;
+    width: 100%;
+}
+
+.fieldError {
+    margin-top: 3px;
+    color: red;
+    font-weight: 400;
+}
+
+.main {
+    margin: 15% 8%;
+}
+
+.footer-container {
+    width: 100%;
+    background: #bff8ff;
+    min-height: 48vh;
+}

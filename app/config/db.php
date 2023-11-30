@@ -2,44 +2,49 @@
 
 class Database
 {
-    private $host;
-    private $username;
-    private $password;
-    private $database;
-    private $connection;
-
-    public function __construct($host, $username, $password, $database)
+    public static function query(string $sql, array $types, array $params): mysqli_result|bool
     {
-        $this->host = $host;
-        $this->username = $username;
-        $this->password = $password;
-        $this->database = $database;
+        $connection = new mysqli(...DB_DATA);
+        $connection->autocommit(true);
 
-        $this->connect();
-    }
+        $stmt = $connection->prepare($sql);
 
-    public function __destruct() {
-        if ($this->connection->ping()) {
-            $this->close();
+        if ($stmt === false) {
+            die("Hiba az sql előkészítése közben: " .  $connection->error);
         }
-    }
 
-    private function connect()
-    {
-        $this->connection = new mysqli($this->host, $this->username, $this->password, $this->database);
-
-        if ($this->connection->connect_error) {
-            die("Connection failed: " . $this->connection->connect_error);
+        if (!empty($types) && !empty($params)) {
+            $stmt->bind_param(implode('', $types), ...$params);
         }
+
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        $connection->close();
+
+        return $result;
     }
 
-    public function query($sql)
-    {
-        return $this->connection->query($sql);
-    }
+    public static function insert(string $sql, array $types, array $params): int {
+        $connection = new mysqli(...DB_DATA);
 
-    public function close()
-    {
-        $this->connection->close();
+        $stmt = $connection->prepare($sql);
+
+        if ($stmt === false) {
+            die("Hiba az sql előkészítése közben: " .  $connection->error);
+        }
+
+        if (!empty($types) && !empty($params)) {
+            $stmt->bind_param(implode('', $types), ...$params);
+        }
+
+        $result = $stmt->execute();
+
+        $id = $result ? $connection->insert_id : 0;
+
+        $connection->close();
+
+        return $id;
     }
 }
