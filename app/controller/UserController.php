@@ -20,7 +20,7 @@ class UserController extends Controller
     private static string $publicValues = 'id, email, name, role, created_at, created_by';
 
     public static function getAllUsers(): array {
-        return self::selectModels('select * from users', false);
+        return self::selectModels(User::class, 'select * from users', false);
     }
 
     public static function login(int $id): void {
@@ -40,18 +40,18 @@ class UserController extends Controller
     }
 
     private static function getSessionUserById(int $id): User|null {
-        return self::selectModels('select ' . self::$publicValues . ' from users where id = ? LIMIT 1', true, [SqlValueType::INT->value], [$id]);
+        return self::selectModels(User::class, 'select ' . self::$publicValues . ' from users where id = ? LIMIT 1', true, [SqlValueType::INT->value], [$id]);
     }
 
     public static function getIdByEmailAndPassword(string $email, string $password): int {
-        $existingUser = self::selectModels('select id, email, password from users where email = ? LIMIT 1', true, [SqlValueType::STRING->value], [$email]);
+        $existingUser = self::selectModels(User::class, 'select id, email, password from users where email = ? LIMIT 1', true, [SqlValueType::STRING->value], [$email]);
 
         return $existingUser != null && password_verify($password, $existingUser->getPassword()) ? $existingUser->getId() : 0;
     }
 
     public static function userExistsByField(string $field, mixed $value, string $valueType, string $operator): bool {
         return self::selectModels(
-            'select * from users where ' . $field . ' ' . $operator . ' ? LIMIT 1', true, [$valueType],  [$value]
+            User::class, 'select * from users where ' . $field . ' ' . $operator . ' ? LIMIT 1', true, [$valueType],  [$value]
             ) != null;
     }
 
@@ -82,32 +82,6 @@ class UserController extends Controller
             $newUser->getName(),
             $newUser->getRole()->value
         ]);
-    }
-
-    private static function selectModels(string $query, bool $single, array $types = [], array $params = []): array|User|null {
-        $users = [];
-        $result = Database::query($query, $types, $params);
-        $user = $result->fetch_assoc();
-
-        do {
-            if ($user != null) {
-                if (isset($user['created_at'])) {
-                    try {
-                        $user['created_at'] = new DateTime($user['created_at']);
-                    } catch (Exception $ignored) {
-                        $user['created_at'] = null;
-                    }
-                }
-
-                if (isset($user['role'])) {
-                    $user['role'] = Role::from($user['role']);
-                }
-
-                $users[] = new User(...$user);
-            }
-        } while ($user = $result->fetch_assoc() && !$single);
-
-        return $single ? $users[0] ?? null : $users;
     }
 
     public function index(): void

@@ -4,6 +4,7 @@
 use controller\LayoutController;
 use router\Router;
 
+require_once 'app/controller/NotificationController.php';
 require_once 'app/controller/LayoutController.php';
 require_once 'app/controller/UserController.php';
 require_once "app/config/db.php";
@@ -32,9 +33,12 @@ $layoutController = new LayoutController();
 <body>
     <?php
         $layoutController->header();
+        include('app/template/notification.php');
+
         echo '<div class="main">';
-        $router->route($_GET['q'] ?? 'home', $_POST);
+            $router->route($_GET, $_POST);
         echo '</div>';
+
         $layoutController->footer();
     ?>
 

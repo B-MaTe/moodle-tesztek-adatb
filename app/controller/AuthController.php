@@ -1,6 +1,7 @@
 <?php
 
 namespace controller;
+use enum\NotificationType;
 use enum\SqlValueType;
 
 require_once 'app/controller/Controller.php';
@@ -35,6 +36,7 @@ class AuthController extends Controller
         }
 
         UserController::login($id);
+        NotificationController::setNotification(NotificationType::SUCCESS, "Sikeres bejelentkezés!");
         header('Location: home');
 
     }
@@ -54,11 +56,13 @@ class AuthController extends Controller
 
         $id = UserController::registerAndReturnId($data);
         UserController::login($id);
+        NotificationController::setNotification(NotificationType::SUCCESS, "Sikeres regisztráció!");
         header('Location: home');
     }
 
     public function logout(): void {
         UserController::logout();
+        NotificationController::setNotification(NotificationType::SUCCESS, "Sikeres kijelentkezés!");
 
         header('Location: login');
     }

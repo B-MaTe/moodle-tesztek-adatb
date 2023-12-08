@@ -37,7 +37,31 @@ class Page
         return $this->totalRecords;
     }
 
+    public function getTotalPages(): int
+    {
+        return ceil($this->totalRecords / $this->pageSize);
+    }
+
     public function setItems(array $items): void {
         $this->items = $items;
+    }
+
+    public function getParams($uri, $pageSize, $currentPage): string {
+        return $uri . '?pageSize=' . $pageSize . '&page=' . min(max(0, $currentPage), $this->getTotalPages() - 1);
+    }
+
+    public function getPreviousPageParams($uri): string
+    {
+        return $this->getParams($uri, $this->pageSize, $this->currentPage-1);
+    }
+
+    public function getNextPageParams($uri): string
+    {
+        return $this->getParams($uri, $this->pageSize, $this->currentPage+1);
+    }
+
+    public function getParamsDefault($uri): string
+    {
+        return $this->getParams($uri, $this->pageSize, $this->currentPage);
     }
 }

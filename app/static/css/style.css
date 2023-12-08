@@ -25,3 +25,108 @@ html, body {
     background: #bff8ff;
     min-height: 48vh;
 }
+
+.hidden {
+    display: none;
+}
+
+.alert {
+    position: fixed;
+    z-index: 2;
+    top: 50%;
+    padding: 20px;
+    background-color: #f44336;
+    color: white;
+    opacity: 1;
+    transition: opacity 0.6s;
+}
+
+.alert.success {background-color: #04AA6D;}
+.alert.info {background-color: #2196F3;}
+.alert.warning {background-color: #ff9800;}
+
+.closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.closebtn:hover {
+    color: black;
+}
+
+.card-container {
+    display: flex;
+    margin: 50px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+}
+
+.card-container .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 25px;
+    padding: 25px 25px 0;
+    width: 35rem;
+    height: 20rem;
+    box-shadow: 2px 5px 3px rgb(155, 155, 155);
+}
+
+.card-container .created {
+    display: flex;
+    flex-direction: row;
+    margin-top: 25px;
+    color: grey;
+    justify-content: space-between;
+}
+
+.card-container .created p:first-child {
+    text-align: left;
+}
+
+.card-container .created p:last-child {
+    text-align: right;
+}
+
+.card-container .card-title {
+    font-size: 35px;
+    text-align: center;
+}
+
+.card-container .card-link {
+    font-weight: bold;
+    margin: auto;
+    font-size: 19px;
+}
+
+.test {
+    font-family: monospace;
+}
+
+.test h4 {
+    color: darkslategrey;
+    font-size: 35px;
+}
+
+.question {
+    background-color: #d8dcdc;
+}
+
+.test .form-check {
+    width: fit-content;
+    transition: .3s;
+}
+
+.test .form-check:hover {
+    font-weight: bold;
+    transform: scale(1.1);
+}
+

@@ -1,6 +1,8 @@
 <?php
-    use controller\UserController;
-    $loggedIn = UserController::userLoggedIn();
+
+use controller\UserController;
+
+$loggedIn = UserController::userLoggedIn();
 ?>
 <div class="title mx-auto row text-center mt-5">
     <h1 class="display-4 col-12">Üdvözlünk, kedves <?php echo $loggedIn ? UserController::getLoggedInUser()->getName() : 'vendég felhasználó' ?>!</h1>
@@ -9,7 +11,7 @@
     <?php
     if ($loggedIn) {
         ?>
-        <!-- List tests -->
+        <p>Irány a <a href="tests">tesztek</a> kitöltése!</p>
     <?php
     } else {
         ?>

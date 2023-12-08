@@ -4,6 +4,10 @@ namespace util\pageable;
 
 class Pageable
 {
+    /**
+     * Default Page size.
+     */
+    public const DEFAULT_PAGE_SIZE = 4;
     private int $pageSize;
     private int $page;
     private int $totalRecords;

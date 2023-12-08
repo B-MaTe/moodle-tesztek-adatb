@@ -10,7 +10,7 @@ require_once 'app/controller/FormController.php';
                 <h3 class="text-primary">Regisztráció</h3>
             </div>
             <div>
-                <form action="registerUser" method="post">
+                <form action="register-user" method="post">
                     <div class="input-group mb-3">
                                 <span class="input-group-text bg-primary"><i
                                         class="bi bi-envelope text-white"></i></span>

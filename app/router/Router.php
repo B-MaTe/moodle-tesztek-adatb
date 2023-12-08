@@ -14,7 +14,8 @@ readonly class Router
         $this->routes = $routes;
     }
 
-    public function route($path, $data): void {
+    public function route($uri, $data): void {
+        $path = $uri['q'] ?? 'home';
         $key = 'home';
         if ($path != null && array_key_exists($path, $this->routes)) {
             $key = $path;
@@ -34,8 +35,9 @@ readonly class Router
                 break;
             case '':
             case 'GET':
+                $controller->$controllerAction(...array_values(array_filter($uri, function($key) { return $key != 'q'; }, ARRAY_FILTER_USE_KEY)));
+                break;
             default:
-                $controller->$controllerAction();
                 break;
 
         }

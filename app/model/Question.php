@@ -8,25 +8,25 @@ class Question extends AuditedModel
 {
     private string $text;
     private int $point;
-    private int $goodAnswerId;
-    private array $wrongAnswerIds;
+    private Answer|null $goodAnswer;
+    private array $wrongAnswers;
 
     /**
      * @param string $text
      * @param int $point
-     * @param int $goodAnswerId
-     * @param array $wrongAnswerIds
      * @param int $id
+     * @param Answer|null $goodAnswer
+     * @param array|null $wrongAnswers
      * @param DateTime|null $created_at
      * @param int $created_by
      */
-    public function __construct(string $text, int $point, int $goodAnswerId, array $wrongAnswerIds, int $id = 0, DateTime $created_at = null, int $created_by = 0)
+    public function __construct(string $text = '', int $point = 0, int $id = 0, Answer|null $goodAnswer = null, ?array $wrongAnswers = [], DateTime $created_at = null, int $created_by = 0)
     {
         parent::__construct($id, $created_at, $created_by);
         $this->text = $text;
         $this->point = $point;
-        $this->goodAnswerId = $goodAnswerId;
-        $this->wrongAnswerIds = $wrongAnswerIds;
+        $this->goodAnswer = $goodAnswer;
+        $this->wrongAnswers = $wrongAnswers;
     }
 
     public function getText(): string
@@ -49,23 +49,36 @@ class Question extends AuditedModel
         $this->point = $point;
     }
 
-    public function getGoodAnswerId(): int
+    public function getGoodAnswer(): Answer|null
     {
-        return $this->goodAnswerId;
+        return $this->goodAnswer;
     }
 
-    public function setGoodAnswerId(int $goodAnswerId): void
+    public function setGoodAnswer(Answer $goodAnswer): void
     {
-        $this->goodAnswerId = $goodAnswerId;
+        $this->goodAnswer = $goodAnswer;
     }
 
-    public function getWrongAnswerIds(): array
+    public function getWrongAnswers(): array
     {
-        return $this->wrongAnswerIds;
+        return $this->wrongAnswers;
     }
 
-    public function setWrongAnswerIds(array $wrongAnswerIds): void
+    public function setWrongAnswers(array $wrongAnswers): void
     {
-        $this->wrongAnswerIds = $wrongAnswerIds;
+        $this->wrongAnswers = $wrongAnswers;
+    }
+
+    public function appendWrongAnswer(Answer $wrongAnswer): void
+    {
+        $this->wrongAnswers[] = $wrongAnswer;
+    }
+
+    public function getRandomizedAnswers(): array
+    {
+        $arr = $this->getWrongAnswers();
+        $arr[] = $this->getGoodAnswer();
+        shuffle($arr);
+        return $arr;
     }
 }

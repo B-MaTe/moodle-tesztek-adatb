@@ -4,7 +4,7 @@
 ?>
 
 <div class="flex w-50 mx-auto">
-    <form action="loginUser" method="post">
+    <form action="login-user" method="post">
         <h1 class="h3 mb-3 fw-normal">Bejelentkezés</h1>
 
         <div class="form-floating">
