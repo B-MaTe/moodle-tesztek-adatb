@@ -12,6 +12,7 @@ use util\pageable\Page;
 use util\pageable\Pageable;
 
 require_once 'app/controller/Controller.php';
+require_once 'app/controller/AuthController.php';
 require_once 'app/model/Test.php';
 require_once 'app/model/Question.php';
 require_once 'app/model/Answer.php';

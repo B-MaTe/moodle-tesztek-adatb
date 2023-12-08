@@ -1,5 +1,10 @@
 <?php
 
+use controller\AuthController;
+use controller\NotificationController;
+use controller\UserController;
+use enum\NotificationType;
+
 if ($test->getId() > 0) {
     // existing test
     ?>
@@ -46,14 +51,17 @@ if ($test->getId() > 0) {
     </div>
 <?php
 } else {
-    // new test (admin privilege)
+    AuthController::checkAdminPrivilege();
+
+
+
+
 }
 
 ?>
 
 <script>
     function resetGroup(groupName) {
-        // Find all radio buttons in the specified group and uncheck them
         document.querySelectorAll('input[type="radio"][name="' + groupName + '"]').forEach(function (radio) {
             radio.checked = false;
         });

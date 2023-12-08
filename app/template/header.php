@@ -1,6 +1,7 @@
 <?php
     use controller\UserController;
     $loggedIn = UserController::userLoggedIn();
+    $admin = UserController::admin();
 ?>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -19,6 +20,14 @@
                     ?>
                     <li class="nav-item">
                         <a class="nav-link" href="tests">Tesztek</a>
+                    </li>
+                <?php
+                }
+
+                if ($admin) {
+                    ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="test?id=0">Teszt létrehozása</a>
                     </li>
                 <?php
                 }

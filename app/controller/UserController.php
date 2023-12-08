@@ -23,6 +23,11 @@ class UserController extends Controller
         return self::selectModels(User::class, 'select * from users', false);
     }
 
+    public static function admin(): bool
+    {
+        return self::userLoggedIn() && self::getLoggedInUser()->getRole() == Role::ADMIN;
+    }
+
     public static function login(int $id): void {
         $_SESSION['user'] = self::getSessionUserById($id)->sessionView();
     }

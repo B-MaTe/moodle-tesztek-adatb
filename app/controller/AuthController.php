@@ -16,6 +16,14 @@ class AuthController extends Controller
         require_once 'app/view/login.php';
     }
 
+    public static function checkAdminPrivilege(): void {
+        if (!UserController::admin()) {
+            NotificationController::setNotification(NotificationType::ERROR, 'Ehhez nincs jogosultságod!');
+            header('Location: home');
+            exit;
+        }
+    }
+
     public function register(): void
     {
         require_once 'app/view/register.php';
