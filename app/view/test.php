@@ -1,9 +1,6 @@
 <?php
 
-use controller\AuthController;
-use controller\NotificationController;
-use controller\UserController;
-use enum\NotificationType;
+use controller\FormController;
 
 if ($test->getId() > 0) {
     // existing test
@@ -51,21 +48,51 @@ if ($test->getId() > 0) {
     </div>
 <?php
 } else {
-    AuthController::checkAdminPrivilege();
-
-
-
-
+?>
+    <div class="row col-12 test">
+        <form action="add-test" method="post" class="d-flex justify-content-center flex-column flex-space-between">
+            <div class="row mb-2">
+                <div class="col-12">
+                    <h4>Teszt Címe</h4>
+                </div>
+            </div>
+            <div class="row mb-5">
+                <div class="col-9">
+                    <input type="text" required id="title" class="form-control" name="title" placeholder="Teszt címe">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-12">
+                    <h4>Sikeres teszt minimum pontszáma:</h4>
+                </div>
+            </div>
+            <div class="row mb-5">
+                <div class="col-9">
+                    <input type="number" required id="min_points" class="form-control" name="min_points" placeholder="Teszt minimum pontszáma">
+                    <?php FormController::showFieldError('min_points'); ?>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-12">
+                    <h4>Kérdések hozzáaádsa</h4>
+                </div>
+            </div>
+            <div id="questionsContainer"></div>
+            <div class="col-3 my-5">
+                <button type="button" class="btn btn-secondary" onclick="addQuestion()"><i class="bi bi-plus"></i> Új kérdés hozzáadása</button>
+            </div>
+            <div class="row mt-5">
+                <div class="col-12 text-center">
+                    <button type="submit" id="submit" disabled class="btn btn-success"><i class="bi bi-download"></i> Teszt hozzáadása</button>
+                </div>
+            </div>
+        </form>
+    </div>
+<?php
 }
 
 ?>
 
-<script>
-    function resetGroup(groupName) {
-        document.querySelectorAll('input[type="radio"][name="' + groupName + '"]').forEach(function (radio) {
-            radio.checked = false;
-        });
-    }
-</script>
+<script src="app/static/js/test.js"></script>
 
 

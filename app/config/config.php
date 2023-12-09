@@ -8,6 +8,7 @@ const ROUTES = [
         'home' => ['controller' => 'HomeController', 'action' => 'index', 'method' => 'GET'],
         'tests' => ['controller' => 'TestController', 'action' => 'listPageable', 'method' => 'GET'],
         'test' => ['controller' => 'TestController', 'action' => 'singleTest', 'method' => 'GET'],
+        'add-test' => ['controller' => 'TestController', 'action' => 'addTest', 'method' => 'POST'],
         'login' => ['controller' => 'AuthController', 'action' => 'index', 'method' => 'GET'],
         'logout' => ['controller' => 'AuthController', 'action' => 'logout', 'method' => 'GET'],
         'register' => ['controller' => 'AuthController', 'action' => 'register', 'method' => 'GET'],

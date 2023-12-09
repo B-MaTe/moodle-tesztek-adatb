@@ -5,16 +5,14 @@ use Database;
 use DateTime;
 use enum\Role;
 use enum\SqlValueType;
-use Exception;
 use model\User;
 
 require_once 'app/config/db.php';
-require_once 'app/controller/Controller.php';
 require_once 'app/model/User.php';
 require_once 'app/enum/Role.php';
 require_once 'app/enum/SqlValueType.php';
 
-class UserController extends Controller
+class UserController extends DataController
 {
 
     private static string $publicValues = 'id, email, name, role, created_at, created_by';
@@ -23,9 +21,9 @@ class UserController extends Controller
         return self::selectModels(User::class, 'select * from users', false);
     }
 
-    public static function admin(): bool
+    public static function adminOrTeacher(): bool
     {
-        return self::userLoggedIn() && self::getLoggedInUser()->getRole() == Role::ADMIN;
+        return self::userLoggedIn() && (self::getLoggedInUser()->getRole() == Role::TEACHER || self::getLoggedInUser()->getRole() == Role::ADMIN);
     }
 
     public static function login(int $id): void {
@@ -81,7 +79,7 @@ class UserController extends Controller
             SqlValueType::STRING->value,
             SqlValueType::STRING->value
         ], [
-            $newUser->getCreated_at()->format('Y-m-d H:i:s'),
+            $newUser->sqlCreated_at(),
             $newUser->getEmail(),
             $newUser->getPassword(),
             $newUser->getName(),
@@ -94,4 +92,8 @@ class UserController extends Controller
         // TODO: Implement index() method.
     }
 
+    public static function save($model): int
+    {
+        return 0;
+    }
 }

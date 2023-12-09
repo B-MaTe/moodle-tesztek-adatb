@@ -33,6 +33,7 @@ class Test extends AuditedModel
         $this->name = $name;
         $this->min_points = $min_points;
         $this->active = $active;
+        $this->questions = $questions;
     }
 
     public function getName(): string

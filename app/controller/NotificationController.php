@@ -16,4 +16,9 @@ class NotificationController
     {
         $_SESSION['notification'][2] = true;
     }
+
+    public static function getNotificationText(): string
+    {
+        return isset($_SESSION['notification']) ? $_SESSION['notification'][1] : '';
+    }
 }

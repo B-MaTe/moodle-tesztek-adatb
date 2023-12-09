@@ -10,6 +10,7 @@ class Question extends AuditedModel
     private int $point;
     private Answer|null $goodAnswer;
     private array $wrongAnswers;
+    private array $tests;
 
     /**
      * @param string $text
@@ -17,16 +18,18 @@ class Question extends AuditedModel
      * @param int $id
      * @param Answer|null $goodAnswer
      * @param array|null $wrongAnswers
+     * @param array|null $tests
      * @param DateTime|null $created_at
      * @param int $created_by
      */
-    public function __construct(string $text = '', int $point = 0, int $id = 0, Answer|null $goodAnswer = null, ?array $wrongAnswers = [], DateTime $created_at = null, int $created_by = 0)
+    public function __construct(string $text = '', int $point = 0, int $id = 0, Answer|null $goodAnswer = null, ?array $wrongAnswers = [], ?array $tests = [], DateTime $created_at = null, int $created_by = 0)
     {
         parent::__construct($id, $created_at, $created_by);
         $this->text = $text;
         $this->point = $point;
         $this->goodAnswer = $goodAnswer;
         $this->wrongAnswers = $wrongAnswers;
+        $this->tests = $tests;
     }
 
     public function getText(): string
@@ -73,6 +76,22 @@ class Question extends AuditedModel
     {
         $this->wrongAnswers[] = $wrongAnswer;
     }
+
+    public function getTests(): array
+    {
+        return $this->tests;
+    }
+
+    public function setTests(array $tests): void
+    {
+        $this->tests = $tests;
+    }
+
+    public function appendTest(Test $test): void
+    {
+        $this->tests[] = $test;
+    }
+
 
     public function getRandomizedAnswers(): array
     {

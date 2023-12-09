@@ -28,17 +28,17 @@ if (isset($_SESSION['notification']) && $_SESSION['notification'][2] === false) 
 
 <div class="alert <?php echo $errorHidden; ?>">
     <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-    <strong><?php echo $_SESSION['notification'][1]; ?></strong>
+    <strong><?php echo NotificationController::getNotificationText(); ?></strong>
 </div>
 <div class="alert success <?php echo $successHidden; ?>">
     <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-    <strong><?php echo $_SESSION['notification'][1]; ?></strong>
+    <strong><?php echo NotificationController::getNotificationText(); ?></strong>
 </div>
 <div class="alert info <?php echo $infoHidden; ?>">
     <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-    <strong><?php echo $_SESSION['notification'][1]; ?></strong>
+    <strong><?php echo NotificationController::getNotificationText(); ?></strong>
 </div>
 <div class="alert warning <?php echo $warningHidden; ?>">
     <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-    <strong><?php echo $_SESSION['notification'][1]; ?></strong>
+    <strong><?php echo NotificationController::getNotificationText(); ?></strong>
 </div>

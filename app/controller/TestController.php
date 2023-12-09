@@ -3,23 +3,23 @@
 namespace controller;
 use Database;
 use DateTime;
+use enum\NotificationType;
 use enum\SqlValueType;
 use Exception;
 use model\Answer;
+use model\AuditedModel;
 use model\Question;
 use model\Test;
 use util\pageable\Page;
 use util\pageable\Pageable;
 
-require_once 'app/controller/Controller.php';
 require_once 'app/controller/AuthController.php';
 require_once 'app/model/Test.php';
 require_once 'app/model/Question.php';
 require_once 'app/model/Answer.php';
 
-class TestController extends Controller
+class TestController extends DataController
 {
-
     public function index(): void
     {
         $page = $this->getActivePageable(Pageable::builder()->withPageSize(PHP_INT_MAX)->withPage(0)->withTotalRecords($this->countActiveTests())->build());
@@ -45,6 +45,75 @@ class TestController extends Controller
 
         $page->setItems(self::selectModels(Test::class, $testPageSql, false, [SqlValueType::INT->value, SqlValueType::INT->value], [$pageable->getOffset(), $pageable->getPageSize()]));
         return $page;
+    }
+
+    public function addTest($test): void {
+        AuthController::checkAdminOrTeacherPrivilege();
+
+        $currentUserId = UserController::getLoggedInUser()->getId();
+        $model = new Test();
+        $model->setName($test['title']);
+        $model->setActive(true);
+        $model->setMin_points($test['min_points']);
+        $model->setCreated_at(new DateTime());
+        $model->setCreated_by($currentUserId);
+
+        $questions = array_filter($test, function ($key) {
+            return str_starts_with($key, 'q-');
+        }, ARRAY_FILTER_USE_KEY);
+        $answers = array_filter($test, function ($key) {
+            return str_starts_with($key, 'a-');
+        }, ARRAY_FILTER_USE_KEY);
+        $correctAnswers = array_filter($test, function ($key) {
+            return str_starts_with($key, 'ca-');
+        }, ARRAY_FILTER_USE_KEY);
+        $points = array_filter($test, function ($key) {
+            return str_starts_with($key, 'p-');
+        }, ARRAY_FILTER_USE_KEY);
+
+        $pointsSum = 0;
+
+        $questionModels = [];
+        foreach ($questions as $key => $questionText) {
+            $questionId = substr($key, -1);
+            $question = new Question();
+            $question->setText($questionText);
+            $point = array_filter($points, function ($answerKey) use ($questionId) { return str_starts_with($answerKey, 'p-' . $questionId); }, ARRAY_FILTER_USE_KEY);
+            $point = reset($point);
+            $question->setPoint($point);
+            $pointsSum += $point;
+            $question->setCreated_by($currentUserId);
+            $question->setCreated_at(new DateTime());
+            foreach (array_filter($answers, function ($answerKey) use ($questionId) { return str_starts_with($answerKey, 'a-' . $questionId); }, ARRAY_FILTER_USE_KEY) as $answerKey => $answerText) {
+                $answer = new Answer();
+                $answer->setText($answerText);
+                $answer->setCorrect(in_array($answerKey, $correctAnswers));
+                $answer->setCreated_by($currentUserId);
+                $answer->setCreated_at(new DateTime());
+                $answer->setQuestion($question);
+
+                if ($answer->isCorrect()) {
+                    $question->setGoodAnswer($answer);
+                } else {
+                    $question->appendWrongAnswer($answer);
+                }
+            }
+            $questionModels[] = $question;
+        }
+
+        if ($pointsSum < $test['min_points']) {
+            FormController::addError('min_points', 'A sikeres teszt pontszáma nem lehet nagyobb mint a kérdések pontszámának összege! (Kérdések pontszámának összege: ' . $pointsSum .')');
+            header('Location: test');
+            // TODO: save form data
+            exit;
+        }
+
+        $model->setQuestions($questionModels);
+
+        $id = self::save($model);
+
+        NotificationController::setNotification(NotificationType::SUCCESS, 'Sikeres teszt létrehozás!');
+        header('Location: test?id=' . $id);
     }
 
     /**
@@ -73,14 +142,21 @@ class TestController extends Controller
                 FROM
                     tests
                 LEFT JOIN
-                    questions ON tests.id = questions.test_id
+                    test_question ON tests.id = test_question.test_id
+                LEFT JOIN
+                    questions ON test_question.question_id = questions.id
                 LEFT JOIN
                     answers ON questions.id = answers.question_id
-                WHERE tests.id = ? AND tests.active = true',
+                WHERE
+                    tests.id = ? AND tests.active = true;',
         false, [SqlValueType::INT->value], [$id]);
         }
 
         $test = $result != null ? self::getTestFromQueryResult($result) : new Test();
+
+        if ($test->getId() == 0) {
+            AuthController::checkAdminOrTeacherPrivilege();
+        }
 
         require_once 'app/view/test.php';
     }
@@ -102,7 +178,6 @@ class TestController extends Controller
         $test = null;
         $questions = [];
         $answers = [];
-
         foreach ($result as $row) {
             if ($test === null) {
                 $test = new Test(
@@ -147,5 +222,24 @@ class TestController extends Controller
         }
         $test->setQuestions($questions);
         return $test;
+    }
+
+    public static function save(Test|AuditedModel $model): int
+    {
+        $id = Database::insert('insert into tests (name, min_points, active, created_by, created_at) values (?, ?, ?, ?, ?)',
+        [SqlValueType::STRING->value, SqlValueType::INT->value, SqlValueType::INT->value, SqlValueType::INT->value, SqlValueType::STRING->value],
+        [$model->getName(), $model->getMin_points(), $model->isActive(), $model->getCreated_by(), $model->sqlCreated_at()]);
+
+        $model->setId($id);
+        foreach ($model->getQuestions() as $question) {
+            $question->setTests([$model]);
+            $questionId = QuestionController::save($question);
+
+            Database::insert('insert ignore into test_question (test_id, question_id) values (?, ?)',
+                [SqlValueType::INT->value, SqlValueType::INT->value],
+                [$id, $questionId]);
+        }
+
+        return $id;
     }
 }

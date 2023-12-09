@@ -4,7 +4,11 @@
 use controller\LayoutController;
 use router\Router;
 
+require_once 'app/controller/Controller.php';
+require_once 'app/controller/DataController.php';
 require_once 'app/controller/NotificationController.php';
+require_once 'app/controller/QuestionController.php';
+require_once 'app/controller/AnswerController.php';
 require_once 'app/controller/LayoutController.php';
 require_once 'app/controller/UserController.php';
 require_once "app/config/db.php";

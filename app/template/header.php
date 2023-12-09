@@ -1,7 +1,7 @@
 <?php
     use controller\UserController;
     $loggedIn = UserController::userLoggedIn();
-    $admin = UserController::admin();
+    $admin = UserController::adminOrTeacher();
 ?>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">

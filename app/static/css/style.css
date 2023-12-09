@@ -130,3 +130,17 @@ html, body {
     transform: scale(1.1);
 }
 
+input[readonly] {
+    background-color: #f4f4f4;
+    border: 3px solid green;
+    border-radius: 5px;
+}
+
+input {
+    height: 45px;
+}
+
+.checkbox {
+    margin: auto;
+    height: auto;
+}

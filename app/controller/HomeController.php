@@ -1,7 +1,6 @@
 <?php
 
 namespace controller;
-require_once 'app/controller/Controller.php';
 
 class HomeController extends Controller
 {

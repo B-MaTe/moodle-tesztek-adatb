@@ -8,7 +8,7 @@ class Answer extends AuditedModel
 {
     private bool $correct;
     private string $text;
-    private Question $question;
+    private Question|null $question;
 
     /**
      * @param bool $correct

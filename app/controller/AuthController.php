@@ -4,7 +4,6 @@ namespace controller;
 use enum\NotificationType;
 use enum\SqlValueType;
 
-require_once 'app/controller/Controller.php';
 require_once 'app/controller/FormController.php';
 require_once 'app/enum/SqlValueType.php';
 
@@ -16,9 +15,9 @@ class AuthController extends Controller
         require_once 'app/view/login.php';
     }
 
-    public static function checkAdminPrivilege(): void {
-        if (!UserController::admin()) {
-            NotificationController::setNotification(NotificationType::ERROR, 'Ehhez nincs jogosultságod!');
+    public static function checkAdminOrTeacherPrivilege(): void {
+        if (!UserController::adminOrTeacher()) {
+            NotificationController::setNotification(NotificationType::ERROR, 'Ehhez nincs elég jogosultsága!');
             header('Location: home');
             exit;
         }
