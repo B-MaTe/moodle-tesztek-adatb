@@ -100,4 +100,11 @@ class Question extends AuditedModel
         shuffle($arr);
         return $arr;
     }
+
+    public function getAnswers(): array
+    {
+        $arr = $this->getWrongAnswers();
+        $arr[] = $this->getGoodAnswer();
+        return $arr;
+    }
 }

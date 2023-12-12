@@ -2,6 +2,7 @@
 
 namespace model;
 
+use controller\UserController;
 use DateTime;
 
 abstract class AuditedModel
@@ -40,6 +41,11 @@ abstract class AuditedModel
     public function getCreated_by(): int
     {
         return $this->created_by;
+    }
+
+    public function getCreatedByEmail(): string
+    {
+        return UserController::getUserById($this->getCreated_by())->getEmail();
     }
 
     public function setCreated_by(int $created_by): void

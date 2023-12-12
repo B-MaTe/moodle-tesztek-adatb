@@ -21,4 +21,9 @@ class AnswerController extends DataController
             [SqlValueType::STRING->value, SqlValueType::INT->value, SqlValueType::STRING->value, SqlValueType::INT->value, SqlValueType::INT->value],
         [$model->getText(), $model->isCorrect(), $model->sqlCreated_at(), $model->getCreated_by(), $model->getQuestion()->getId()]);
     }
+
+    public static function delete(int $id): bool
+    {
+        return Database::query('delete from answers where id = ?', [SqlValueType::INT->value], [$id]) != false;
+    }
 }

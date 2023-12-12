@@ -14,9 +14,18 @@
         <div class="card">
             <h5 class="card-title"><?php echo $item->getName(); ?></h5>
             <a href="test?id=<?php echo $item->getId(); ?>" class="card-link">Teszt kitöltése</a>
+            <?php
+            if (UserController::adminOrTeacher()) {
+                ?>
+                <a href="test?id=<?php echo $item->getId(); ?>" class="card-link">Teszt módosítása</a>
+                <a href="delete-test?id=<?php echo $item->getId(); ?>" class="card-link">Teszt törlése</a>
+            <?php
+            }
+            ?>
+
 
             <div class="created">
-                <p>Készítette: <?php echo $item->getCreated_by(); ?></p>
+                <p>Készítette: <?php echo $item->getCreatedByEmail(); ?></p>
                 <p><?php echo $item->getCreated_at()->format('Y-m-d'); ?></p>
             </div>
         </div>

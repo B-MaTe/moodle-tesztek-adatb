@@ -26,6 +26,10 @@ class UserController extends DataController
         return self::userLoggedIn() && (self::getLoggedInUser()->getRole() == Role::TEACHER || self::getLoggedInUser()->getRole() == Role::ADMIN);
     }
 
+    public static function getUserById(int $id): User|null {
+        return self::selectModels(User::class, 'select ' . self::$publicValues . ' from users where id = ? LIMIT 1', true, [SqlValueType::INT->value], [$id]);
+    }
+
     public static function login(int $id): void {
         $_SESSION['user'] = self::getSessionUserById($id)->sessionView();
     }
@@ -95,5 +99,10 @@ class UserController extends DataController
     public static function save($model): int
     {
         return 0;
+    }
+
+    public static function delete(int $id): bool
+    {
+        // TODO: Implement delete() method.
     }
 }

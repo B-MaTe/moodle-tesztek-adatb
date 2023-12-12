@@ -10,6 +10,7 @@ use model\Answer;
 use model\AuditedModel;
 use model\Question;
 use model\Test;
+use model\TestCompletion;
 use util\pageable\Page;
 use util\pageable\Pageable;
 
@@ -17,34 +18,76 @@ require_once 'app/controller/AuthController.php';
 require_once 'app/model/Test.php';
 require_once 'app/model/Question.php';
 require_once 'app/model/Answer.php';
+require_once 'app/model/TestCompletion.php';
 
 class TestController extends DataController
 {
     public function index(): void
     {
-        $page = $this->getActivePageable(Pageable::builder()->withPageSize(PHP_INT_MAX)->withPage(0)->withTotalRecords($this->countActiveTests())->build());
+        $page = $this->getActivePageable(Pageable::builder()->withPageSize(PHP_INT_MAX)->withPage(0)->withTotalRecords($this->count(Test::class))->build());
         require_once 'app/view/tests.php';
     }
 
     public function listPageable($pageSize = Pageable::DEFAULT_PAGE_SIZE, $page = 0): void {
-        $pageSize = self::numOrDefault($pageSize, Pageable::DEFAULT_PAGE_SIZE);
-        $page = self::numOrDefault($page, 0);
+        $pageSize = numOrDefault($pageSize, Pageable::DEFAULT_PAGE_SIZE);
+        $page = numOrDefault($page, 0);
 
         $page = $this->getActivePageable(
             Pageable::builder()
                 ->withPageSize($pageSize)
-                ->withPage($page)->withTotalRecords($this->countActiveTests())
+                ->withPage($page)->withTotalRecords($this->count(Test::class, true))
                 ->build());
         require_once 'app/view/tests.php';
     }
 
-    public function getActivePageable(Pageable $pageable): Page {
-        $page = new Page([], $pageable->getPage(), $pageable->getPageSize(), $pageable->getTotalRecords());
 
-        $testPageSql = 'select * from tests where active = true ORDER BY id LIMIT ?, ?';
 
-        $page->setItems(self::selectModels(Test::class, $testPageSql, false, [SqlValueType::INT->value, SqlValueType::INT->value], [$pageable->getOffset(), $pageable->getPageSize()]));
-        return $page;
+    public static function deleteTest($id): void
+    {
+        AuthController::checkAdminOrTeacherPrivilege();
+
+        if (self::delete($id)) {
+            NotificationController::setNotification(NotificationType::SUCCESS, 'Sikeres teszt törlés!');
+        } else {
+            NotificationController::setNotification(NotificationType::ERROR, 'Sikertelen teszt törlés!');
+        }
+
+        header('Location: tests');
+    }
+
+    public static function delete(int $id): bool {
+        return Database::delete('delete from tests where id = ?', [SqlValueType::INT->value], [$id]);
+    }
+
+    public static function fillTest($data): void {
+        $testCompletion = new TestCompletion();
+        $test = self::selectModels(Test::class, 'select * from tests where id = ?', true, [SqlValueType::INT->value], [$data['id']]);
+        $collectedPoints = 0;
+
+        $testCompletion->setTestId($test->getId());
+        $testCompletion->setCreated_by(UserController::getLoggedInUser()->getId());
+        $testCompletion->setCreated_at(new DateTime());
+
+        foreach (array_filter($data, function ($key) {
+            return $key !== 'id';
+        }, ARRAY_FILTER_USE_KEY) as $questionId => $chosenAnswerId) {
+            $question = QuestionController::getQuestionWithAnswers($questionId);
+
+            if ($question->getGoodAnswer()->getId() == $chosenAnswerId) {
+                $collectedPoints += $question->getPoint();
+            }
+        };
+
+        $testCompletion->setEarnedPoints($collectedPoints);
+        $testCompletion->setSuccessfulCompletion($collectedPoints >= $test->getMin_points());
+
+        $id = TestCompletionController::save($testCompletion);
+        if ($id > 0) {
+            NotificationController::setNotification(NotificationType::SUCCESS, 'Sikeres teszt kitöltés!');
+        } else {
+            NotificationController::setNotification(NotificationType::ERROR, 'Hiba történt!');
+        }
+        header('Location: tests');
     }
 
     public function addTest($test): void {
@@ -70,6 +113,25 @@ class TestController extends DataController
         $points = array_filter($test, function ($key) {
             return str_starts_with($key, 'p-');
         }, ARRAY_FILTER_USE_KEY);
+
+        foreach ($questions as $questionId => $questionText) {
+            $questionParts = explode($questionId, '-');
+            $found = false;
+            foreach ($answers as $answer) {
+                $answerParts = explode($answer, '-');
+
+                if ($questionParts[1] == $answerParts[1]) {
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                NotificationController::setNotification(NotificationType::ERROR, 'Nem minden kérdésnek lett válasz lehetőség megadva.');
+                header("Location: test");
+                exit;
+            }
+        }
 
         $pointsSum = 0;
 
@@ -101,7 +163,14 @@ class TestController extends DataController
             $questionModels[] = $question;
         }
 
-        if ($pointsSum < $test['min_points']) {
+        $existingQuestionIds = array_map(function($existingQuestion) {
+            $parts = explode('-', $existingQuestion);
+            return (int)end($parts);
+        }, $test['existing-questions']);
+
+        $existingPoints = QuestionController::sumPoints($existingQuestionIds);
+
+        if ($pointsSum + $existingPoints < $test['min_points']) {
             FormController::addError('min_points', 'A sikeres teszt pontszáma nem lehet nagyobb mint a kérdések pontszámának összege! (Kérdések pontszámának összege: ' . $pointsSum .')');
             header('Location: test');
             // TODO: save form data
@@ -112,6 +181,14 @@ class TestController extends DataController
 
         $id = self::save($model);
 
+        foreach ($test['existing-questions'] as $selectedQuestion) {
+            $array = explode('-', $selectedQuestion);
+            $existingQuestionId = (int)end($array);
+            Database::insert('insert ignore into test_question (test_id, question_id) values (?, ?)',
+                [SqlValueType::INT->value, SqlValueType::INT->value],
+                [$id, $existingQuestionId]);
+        }
+
         NotificationController::setNotification(NotificationType::SUCCESS, 'Sikeres teszt létrehozás!');
         header('Location: test?id=' . $id);
     }
@@ -120,7 +197,7 @@ class TestController extends DataController
      * @throws Exception
      */
     public function singleTest($id = 0): void {
-        $id = self::numOrDefault($id, 0);
+        $id = numOrDefault($id, 0);
         $result = null;
 
         if ($id != 0) {
@@ -161,14 +238,13 @@ class TestController extends DataController
         require_once 'app/view/test.php';
     }
 
-    private function countActiveTests(): int {
-        $sql = 'select count(*) from tests where active = true';
+    private function getActivePageable(Pageable $pageable): Page {
+        $page = new Page([], $pageable->getPage(), $pageable->getPageSize(), $pageable->getTotalRecords());
 
-        return Database::query($sql, [], [])->fetch_row()[0];
-    }
+        $pageSql = 'select * from tests where active = true ORDER BY id LIMIT ?, ?';
 
-    private function numOrDefault($number, int $default): int {
-        return filter_var($number, FILTER_VALIDATE_INT) !== false ? $number : $default;
+        $page->setItems(self::selectModels(Test::class, $pageSql, false, [SqlValueType::INT->value, SqlValueType::INT->value], [$pageable->getOffset(), $pageable->getPageSize()]));
+        return $page;
     }
 
     /**
@@ -205,6 +281,7 @@ class TestController extends DataController
                 $row['answer_correct'],
                 $row['answer_text'],
                 new Question(id: (int)$row['answer_question_id']),
+                $row['question_id'],
                 $row['answer_id']
             );
         }

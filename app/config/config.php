@@ -9,6 +9,8 @@ const ROUTES = [
         'tests' => ['controller' => 'TestController', 'action' => 'listPageable', 'method' => 'GET'],
         'test' => ['controller' => 'TestController', 'action' => 'singleTest', 'method' => 'GET'],
         'add-test' => ['controller' => 'TestController', 'action' => 'addTest', 'method' => 'POST'],
+        'delete-test' => ['controller' => 'TestController', 'action' => 'deleteTest', 'method' => 'GET'],
+        'fill-test' => ['controller' => 'TestController', 'action' => 'fillTest', 'method' => 'POST'],
         'login' => ['controller' => 'AuthController', 'action' => 'index', 'method' => 'GET'],
         'logout' => ['controller' => 'AuthController', 'action' => 'logout', 'method' => 'GET'],
         'register' => ['controller' => 'AuthController', 'action' => 'register', 'method' => 'GET'],

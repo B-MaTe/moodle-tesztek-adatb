@@ -47,4 +47,27 @@ class Database
 
         return $id;
     }
+
+    public static function delete(string $sql, array $types, array $params): bool
+    {
+        $connection = new mysqli(...DB_DATA);
+
+        $stmt = $connection->prepare($sql);
+
+        if ($stmt === false) {
+            die("Hiba az sql előkészítése közben: " .  $connection->error);
+        }
+
+        if (!empty($types) && !empty($params)) {
+            $stmt->bind_param(implode('', $types), ...$params);
+        }
+
+        $stmt->execute();
+
+        $affectedRows = mysqli_affected_rows($connection);
+
+        $connection->close();
+
+        return $affectedRows > 0;
+    }
 }

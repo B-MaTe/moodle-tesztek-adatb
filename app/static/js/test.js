@@ -4,85 +4,91 @@ function resetGroup(groupName) {
     });
 }
 
-function toggleEdit(inputFieldName, editButtonName) {
-    const titleInput = document.getElementById(inputFieldName);
-    const editButton = document.getElementById(editButtonName);
-
-    titleInput.readOnly = !titleInput.readOnly;
-
-    if (titleInput.readOnly) {
-        editButton.innerText = 'Szerkesztés';
-    } else {
-        editButton.innerText = 'Mentés';
-    }
-}
-
 let questionCount = 1;
-
 
 function addQuestion() {
     const questionsContainer = document.getElementById('questionsContainer');
-
-    // Create a new question container
     const questionContainer = document.createElement('div');
-    questionContainer.classList.add('question-container');
+
+    questionContainer.id = 'qc-' + questionCount;
+
     questionContainer.innerHTML =
-        `<label for="q-${questionCount}">Kérdés ${questionCount}:</label>
-        <input type="text" class="w-50 my-3" id="q-${questionCount}" name="q-${questionCount}" required>
-        <br />
-        <label for="p-${questionCount}">Kérdés ${questionCount} pontszáma:</label>
-        <input type="number" class="w-50 my-3" id="p-${questionCount}" name="p-${questionCount}" required>
-        <br />
-        <button type="button" class="btn btn-secondary" onclick="addAnswer(${questionCount})"><i class="bi bi-plus"></i> Válasz hozzáadása</button>
-        <button type="button" class="btn btn-danger" onclick="deleteQuestion(${questionCount})"><i class="bi bi-trash"></i> Törlés</button>
-        <div id="answersContainer${questionCount}" class="answer-container"></div>`;
+        `${questionCount === 1 ? '<hr />' : ''}
+        <div class="row m-3">
+            <label class="px-2 my-auto col-2" for="q-${questionCount}">Kérdés ${questionCount}:</label>
+            <input class="col-6 px-2 w-50 my-3" type="text" id="q-${questionCount}" name="q-${questionCount}" required>
+        </div>
+        <div class="row m-3">
+            <label class="px-2 my-auto col-2" for="p-${questionCount}">Kérdés ${questionCount} pontszáma:</label>
+            <input class="col-6 px-2 w-50 my-3" type="number" max="10000" id="p-${questionCount}" name="p-${questionCount}" required>
+        </div>
+        <button type="button" class="btn btn-secondary" id="add-answer-${questionCount}"  onclick="addAnswer(${questionCount})"><i class="bi bi-plus"></i> Válasz hozzáadása</button>
+        <button type="button" class="btn btn-danger" onclick="deleteQuestion(${questionCount})"><i class="bi bi-trash"></i> Kérdés Törlése</button>
+        <div id="answersContainer${questionCount}" class="answer-container"></div>
+        <hr />`;
 
-    // Append the question container to the questions container
     questionsContainer.appendChild(questionContainer);
-
-    // Enable the Save button when at least one question is added
     document.getElementById('submit').disabled = false;
-
-    // Increment the question count
     questionCount++;
+}
+
+function toggleExistingQuestions() {
+    const existingQuestionsContainer = document.getElementById('existingQuestionsContainer');
+    const searchInput = document.getElementById('filterInput');
+    existingQuestionsContainer.classList.toggle('hidden');
+    searchInput.classList.toggle('hidden');
+
+    const existingQuestionsButton = document.getElementById('existingQuestionsButton');
+    existingQuestionsButton.innerHTML = existingQuestionsContainer.classList.contains('hidden') ? '<i class="bi bi-plus"></i> Létező kérdések megnyitása' : '<i class="bi bi-dash"></i> Létező kérdések elrejtése';
 }
 
 function addAnswer(questionNumber) {
     const answersContainer = document.getElementById(`answersContainer${questionNumber}`);
 
-    // Create a new answer input with a radio button
+    if (answersContainer.children.length === 4) {
+        const answerButton = document.getElementById(`add-answer-${questionNumber}`);
+        answerButton.disabled = true;
+    }
+
     const answerInput = document.createElement('div');
-    answerInput.classList.add('my-3');
     const answerId = `a-${questionNumber}-${answersContainer.children.length + 1}`;
+
+    answerInput.classList.add('my-3');
     answerInput.innerHTML =
         `<label for="${answerId}">Helyes válasz: </label>
         <input type="radio" class="checkbox" ${answersContainer.children.length === 0 ? 'checked' : ''} name="ca-${questionNumber}" value="${answerId}" required>
         <input type="text" name="${answerId}" required>
-        <button type="button" class="btn btn-danger" onclick="deleteAnswer(${questionNumber}, this)"><i class="bi bi-trash"></i> Törlés</button>`;
+        <button type="button" class="btn btn-danger" onclick="deleteAnswer(${questionNumber}, this)"><i class="bi bi-trash"></i> Válasz Törlése</button>`;
 
     answersContainer.appendChild(answerInput);
 }
 
 function deleteAnswer(questionNumber, answerElement) {
     const answersContainer = document.getElementById(`answersContainer${questionNumber}`);
+
     answersContainer.removeChild(answerElement.parentNode);
 
     if (answersContainer.children.length === 0) {
         deleteQuestion(questionNumber);
+
     } else {
         const radioButtons = answersContainer.querySelectorAll('input[type="radio"]');
         const checkedRadioButtons = Array.from(radioButtons).filter(checkbox => checkbox.checked);
+
         if (checkedRadioButtons.length === 0) {
             radioButtons[radioButtons.length - 1].checked = true;
         }
+
+        const answerButton = document.getElementById(`add-answer-${questionNumber}`);
+        answerButton.disabled = false;
     }
 }
 
 function deleteQuestion(questionNumber) {
     const questionContainer = document.getElementById(`questionsContainer`);
-    const questionToRemove = document.getElementById(`q-${questionNumber}`).parentNode;
+    const questionToRemove = document.getElementById(`qc-${questionNumber}`);
 
-    questionContainer.removeChild(questionToRemove);
+    questionToRemove.remove();
 
     questionCount--;
 
@@ -90,3 +96,20 @@ function deleteQuestion(questionNumber) {
         document.getElementById('submit').disabled = true;
     }
 }
+
+function filterItems() {
+    const filterInput = document.getElementById('filterInput');
+    const filterValue = filterInput.value.toUpperCase().trim();
+    const itemsContainer = document.getElementById('existingQuestionsContainer');
+    const searchableElement = itemsContainer.querySelectorAll('.searchable');
+
+    for (let i = 0; i < searchableElement.length; i++) {
+        const textContent = searchableElement[i].innerText || searchableElement.textContent;
+
+        itemsContainer.children[i].style.display = textContent.toUpperCase().trim().indexOf(filterValue) > -1 ? '' : 'none';
+    }
+}
+
+try {
+    document.getElementById('filterInput').addEventListener('input', filterItems);
+} catch (e) { }
