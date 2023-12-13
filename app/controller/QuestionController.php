@@ -52,6 +52,7 @@ class QuestionController extends DataController
                 [SqlValueType::INT->value, SqlValueType::INT->value],
                 [$test->getId(), $id]);
         }
+
         $model->setId($id);
         foreach ($model->getAnswers() as $answer) {
             $answer->setQuestion($model);

@@ -6,21 +6,21 @@ use DateTime;
 
 class Answer extends AuditedModel
 {
-    private bool $correct;
-    private string $text;
+    private bool|null $correct;
+    private string|null $text;
     private Question|null $question;
-    private int $question_id;
+    private int|null $question_id;
 
     /**
      * @param bool $correct
-     * @param string $text
+     * @param string|null $text
      * @param Question|null $question
-     * @param int $question_id
-     * @param int $id
+     * @param int|null $question_id
+     * @param int|null $id
      * @param DateTime|null $created_at
-     * @param int $created_by
+     * @param int|null $created_by
      */
-    public function __construct(bool $correct = true, string $text = '', Question|null $question = null, int $question_id = 0, int $id = 0, DateTime $created_at = null, int $created_by = 0)
+    public function __construct(bool $correct = true, string|null $text = '', Question|null $question = null, int|null $question_id = 0, int|null $id = 0, DateTime|null $created_at = null, int|null $created_by = 0)
     {
         parent::__construct($id, $created_at, $created_by);
         $this->correct = $correct;

@@ -11,6 +11,7 @@ const ROUTES = [
         'add-test' => ['controller' => 'TestController', 'action' => 'addTest', 'method' => 'POST'],
         'delete-test' => ['controller' => 'TestController', 'action' => 'deleteTest', 'method' => 'GET'],
         'fill-test' => ['controller' => 'TestController', 'action' => 'fillTest', 'method' => 'POST'],
+        'evaluate-test' => ['controller' => 'TestController', 'action' => 'evaluateTest', 'method' => 'GET'],
         'login' => ['controller' => 'AuthController', 'action' => 'index', 'method' => 'GET'],
         'logout' => ['controller' => 'AuthController', 'action' => 'logout', 'method' => 'GET'],
         'register' => ['controller' => 'AuthController', 'action' => 'register', 'method' => 'GET'],

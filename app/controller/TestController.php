@@ -82,12 +82,26 @@ class TestController extends DataController
         $testCompletion->setSuccessfulCompletion($collectedPoints >= $test->getMin_points());
 
         $id = TestCompletionController::save($testCompletion);
+        $location = 'Location: test';
         if ($id > 0) {
+            $location = 'Location: evaluate-test?id=' . $id;
             NotificationController::setNotification(NotificationType::SUCCESS, 'Sikeres teszt kitöltés!');
         } else {
             NotificationController::setNotification(NotificationType::ERROR, 'Hiba történt!');
         }
-        header('Location: tests');
+        header($location);
+    }
+
+    public static function evaluateTest(int $completionId): void {
+        $completion = self::selectModels(TestCompletion::class, 'select * from test_completions where id = ?', true, [SqlValueType::INT->value], [$completionId]);
+        $test = self::selectModels(Test::class, 'select distinct * from tests where id = ?', true, [SqlValueType::INT->value], [$completion->getTestId()]);
+        $questionIds = array_map(function ($question) {
+            return $question['question_id'];
+        }, self::selectModels(null, 'select * from test_question where test_id = ?', false, [SqlValueType::INT->value], [$test->getId()]));
+
+        $oldCompletions = self::selectModels(TestCompletion::class, 'select * from test_completions where id != ? and test_id = ? and created_by = ? order by created_at desc', false, [SqlValueType::INT->value, SqlValueType::INT->value, SqlValueType::INT->value], [$completionId, $test->getId(), UserController::getLoggedInUser()->getId()]);
+        $maxPoints = QuestionController::sumPoints($questionIds);
+        require_once 'app/view/evaluation.php';
     }
 
     public function addTest($test): void {
@@ -162,13 +176,16 @@ class TestController extends DataController
             }
             $questionModels[] = $question;
         }
+        $existingPoints = 0;
 
-        $existingQuestionIds = array_map(function($existingQuestion) {
-            $parts = explode('-', $existingQuestion);
-            return (int)end($parts);
-        }, $test['existing-questions']);
+        if ($test['existing-questions'] != null) {
+            $existingQuestionIds = array_map(function($existingQuestion) {
+                $parts = explode('-', $existingQuestion);
+                return (int)end($parts);
+            }, $test['existing-questions']);
 
-        $existingPoints = QuestionController::sumPoints($existingQuestionIds);
+            $existingPoints = QuestionController::sumPoints($existingQuestionIds);
+        }
 
         if ($pointsSum + $existingPoints < $test['min_points']) {
             FormController::addError('min_points', 'A sikeres teszt pontszáma nem lehet nagyobb mint a kérdések pontszámának összege! (Kérdések pontszámának összege: ' . $pointsSum .')');
@@ -278,7 +295,7 @@ class TestController extends DataController
             }
 
             $answers[] = new Answer(
-                $row['answer_correct'],
+                $row['answer_correct'] == 1,
                 $row['answer_text'],
                 new Question(id: (int)$row['answer_question_id']),
                 $row['question_id'],
