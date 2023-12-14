@@ -15,6 +15,11 @@ class TestCompletionController extends DataController
         // TODO: Implement index() method.
     }
 
+    public static function getCompletionsForTestsByUser($testIds, $userId): array
+    {
+        return self::selectModels(TestCompletion::class, 'SELECT * FROM test_completions WHERE created_by = ? AND test_id IN (' . implode(',', $testIds) . ')', false, [SqlValueType::INT->value], [$userId]);
+    }
+
     public static function save(TestCompletion|AuditedModel $model): int
     {
         return Database::insert('insert into test_completions (test_id, earned_points, successful_completion, created_at, created_by) values (?, ?, ?, ?, ?)',

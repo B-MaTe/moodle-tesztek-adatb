@@ -25,7 +25,7 @@ if ($test->getId() > 0) {
                         $answerId = $answer->getId();
                     ?>
                     <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="<?php echo $questionId; ?>" id="<?php echo $answerId; ?>" value="<?php echo $answerId; ?>" />
+                        <input class="form-check-input" type="radio" name="<?php echo $questionId; ?>" id="<?php echo $answerId; ?>" value="<?php echo $answerId; ?>" required />
                         <label class="form-check-label" for="<?php echo $answerId; ?>">
                             <?php echo $answer->getText(); ?>
                         </label>

@@ -24,20 +24,51 @@ class TestController extends DataController
 {
     public function index(): void
     {
+        AuthController::returnHomeIfLoggedOut();
+
         $page = $this->getActivePageable(Pageable::builder()->withPageSize(PHP_INT_MAX)->withPage(0)->withTotalRecords($this->count(Test::class))->build());
+
+        self::getTestPageWithCompletions($page);
         require_once 'app/view/tests.php';
     }
 
     public function listPageable($pageSize = Pageable::DEFAULT_PAGE_SIZE, $page = 0): void {
+        AuthController::returnHomeIfLoggedOut();
+
         $pageSize = numOrDefault($pageSize, Pageable::DEFAULT_PAGE_SIZE);
         $page = numOrDefault($page, 0);
-
         $page = $this->getActivePageable(
             Pageable::builder()
                 ->withPageSize($pageSize)
                 ->withPage($page)->withTotalRecords($this->count(Test::class, true))
                 ->build());
+        self::getTestPageWithCompletions($page);
+
         require_once 'app/view/tests.php';
+    }
+
+    public static function testStatistics($testId): void {
+        AuthController::returnHomeIfLoggedOut();
+        $completions = TestCompletionController::getCompletionsForTestsByUser([$testId], UserController::getLoggedInUser()->getId());
+        array_map(function (TestCompletion $completion) {
+            $testCompletionAnswers = self::selectModels(null, 'select test_completion_id, question_id, answer_id from test_completion_question_answers where test_completion_id = ?', false, [SqlValueType::INT->value], [$completion->getId()]);
+
+            foreach ($testCompletionAnswers as $testCompletionAnswer) {
+                $questionWithAnswers = QuestionController::getQuestionWithAnswers($testCompletionAnswer['question_id']);
+                $selectedAnswerArray = array_filter($questionWithAnswers->getAnswers(), function (Answer $answer) use ($testCompletionAnswer) {
+                    return $answer->getId() == $testCompletionAnswer['answer_id'];
+                });
+
+                $selectedAnswer = reset($selectedAnswerArray);
+                $questionWithAnswers->setSelectedAnswer($selectedAnswer);
+
+                $completion->appendQuestion($questionWithAnswers);
+            }
+        }, $completions);
+
+        print_r($completions[2]);
+
+        require_once 'app/view/test_statistics.php';
     }
 
 
@@ -59,19 +90,38 @@ class TestController extends DataController
         return Database::delete('delete from tests where id = ?', [SqlValueType::INT->value], [$id]);
     }
 
+    public static function editTestName($data): void {
+        AuthController::checkAdminOrTeacherPrivilege();
+
+        $testId = $data['id'];
+        $newName = $data['name'];
+        $page = $data['page'] ?? 0;
+        $pageSize = $data['pageSize'] ?? Pageable::DEFAULT_PAGE_SIZE;
+
+        Database::query('update tests set name = ? where id = ?', [SqlValueType::STRING->value, SqlValueType::INT->value], [$newName, $testId]);
+
+        NotificationController::setNotification(NotificationType::SUCCESS, 'A teszt neve sikeresen frissítve!');
+        header('Location: tests?pageSize=' . $pageSize . '&page=' . $page);
+    }
+
     public static function fillTest($data): void {
+        AuthController::returnHomeIfLoggedOut();
+
         $testCompletion = new TestCompletion();
         $test = self::selectModels(Test::class, 'select * from tests where id = ?', true, [SqlValueType::INT->value], [$data['id']]);
         $collectedPoints = 0;
+        $currentUserId = UserController::getLoggedInUser()->getId();
 
         $testCompletion->setTestId($test->getId());
-        $testCompletion->setCreated_by(UserController::getLoggedInUser()->getId());
+        $testCompletion->setCreated_by($currentUserId);
         $testCompletion->setCreated_at(new DateTime());
 
+        $questionsWithAnswers = [];
         foreach (array_filter($data, function ($key) {
             return $key !== 'id';
         }, ARRAY_FILTER_USE_KEY) as $questionId => $chosenAnswerId) {
             $question = QuestionController::getQuestionWithAnswers($questionId);
+            $questionsWithAnswers[$questionId] = $chosenAnswerId;
 
             if ($question->getGoodAnswer()->getId() == $chosenAnswerId) {
                 $collectedPoints += $question->getPoint();
@@ -82,10 +132,17 @@ class TestController extends DataController
         $testCompletion->setSuccessfulCompletion($collectedPoints >= $test->getMin_points());
 
         $id = TestCompletionController::save($testCompletion);
+
+        $now = new DateTime();
+        foreach ($questionsWithAnswers as $questionId => $answerId) {
+            Database::insert('insert into test_completion_question_answers (test_completion_id, question_id, answer_id, created_by, created_at) values (?, ?, ?, ?, ?)',
+                [SqlValueType::INT->value, SqlValueType::INT->value, SqlValueType::INT->value, SqlValueType::INT->value, SqlValueType::STRING->value],
+                [$id, $questionId, $answerId, $currentUserId, $now->format('Y-m-d H:i:s')]);
+        }
+
         $location = 'Location: test';
         if ($id > 0) {
             $location = 'Location: evaluate-test?id=' . $id;
-            NotificationController::setNotification(NotificationType::SUCCESS, 'Sikeres teszt kitöltés!');
         } else {
             NotificationController::setNotification(NotificationType::ERROR, 'Hiba történt!');
         }
@@ -93,6 +150,8 @@ class TestController extends DataController
     }
 
     public static function evaluateTest(int $completionId): void {
+        AuthController::returnHomeIfLoggedOut();
+
         $completion = self::selectModels(TestCompletion::class, 'select * from test_completions where id = ?', true, [SqlValueType::INT->value], [$completionId]);
         $test = self::selectModels(Test::class, 'select distinct * from tests where id = ?', true, [SqlValueType::INT->value], [$completion->getTestId()]);
         $questionIds = array_map(function ($question) {
@@ -214,6 +273,7 @@ class TestController extends DataController
      * @throws Exception
      */
     public function singleTest($id = 0): void {
+        AuthController::returnHomeIfLoggedOut();
         $id = numOrDefault($id, 0);
         $result = null;
 
@@ -253,6 +313,24 @@ class TestController extends DataController
         }
 
         require_once 'app/view/test.php';
+    }
+
+    private function getTestPageWithCompletions(Page $page): void {
+        $completionsPerTest = TestCompletionController::getCompletionsForTestsByUser(array_map(function ($test) { return $test->getId(); }, $page->getItems()), UserController::getLoggedInUser()->getId());
+        $items = $page->getItems();
+        array_walk($items, function($test) use ($completionsPerTest) {
+            $completionsForTest = array_filter($completionsPerTest, function($completion) use ($test) {
+                return $completion->getTestId() == $test->getId();
+            });
+
+            usort($completionsForTest, function($a, $b) {
+                return $b->getEarnedPoints() - $a->getEarnedPoints();
+            });
+
+            $test->setCompletions($completionsForTest);
+        });
+
+        $page->setItems($items);
     }
 
     private function getActivePageable(Pageable $pageable): Page {

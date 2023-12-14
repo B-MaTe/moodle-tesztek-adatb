@@ -10,6 +10,7 @@ class Test extends AuditedModel
     private int $min_points;
     private bool $active;
     private array $questions;
+    private array $completions = [];
 
     /**
      * @param string|null $name
@@ -74,5 +75,15 @@ class Test extends AuditedModel
     public function setQuestions(array $questions): void
     {
         $this->questions = $questions;
+    }
+
+    public function getCompletions(): array
+    {
+        return $this->completions;
+    }
+
+    public function setCompletions(array $completions): void
+    {
+        $this->completions = $completions;
     }
 }

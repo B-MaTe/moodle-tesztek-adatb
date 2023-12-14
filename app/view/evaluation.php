@@ -1,5 +1,12 @@
 <?php
 
+use model\Test;
+use model\TestCompletion;
+
+$completion = $completion ?? new TestCompletion();
+$test = $test ?? new Test();
+$oldCompletions = $oldCompletions ?? [];
+
 if ($completion->isSuccessfulCompletion()) {
     $bg = 'bg-success';
     $message = 'Gratulálunk!<br />Elérte a minimum pontszámot!';

@@ -82,6 +82,7 @@ class QuestionController extends DataController
                 $question->appendWrongAnswer($answer);
             }
         }
+
         return $question;
     }
 

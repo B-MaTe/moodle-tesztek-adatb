@@ -4,7 +4,7 @@
 use controller\LayoutController;
 use router\Router;
 
-require_once 'app/util/NumUtils.php';
+require_once 'app/util/num_utils.php';
 require_once 'app/controller/Controller.php';
 require_once 'app/controller/DataController.php';
 require_once 'app/controller/NotificationController.php';

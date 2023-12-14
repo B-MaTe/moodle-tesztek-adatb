@@ -9,6 +9,7 @@ class TestCompletion extends AuditedModel
     private int $test_id;
     private int $earned_points;
     private bool $successful_completion;
+    private array $questions = [];
 
     /**
      * @param int $test_id
@@ -60,5 +61,20 @@ class TestCompletion extends AuditedModel
     public function setSuccessfulCompletion(bool $successful_completion): void
     {
         $this->successful_completion = $successful_completion;
+    }
+
+    public function getQuestions(): array
+    {
+        return $this->questions;
+    }
+
+    public function setQuestions(array $questions): void
+    {
+        $this->questions = $questions;
+    }
+
+    public function appendQuestion(Question $question): void
+    {
+        $this->questions[] = $question;
     }
 }

@@ -9,7 +9,7 @@ class Page
     private int $pageSize;
     private int $totalRecords;
 
-    public function __construct(array $items, int $currentPage, int $pageSize, int $totalRecords)
+    public function __construct(array $items = [], int $currentPage = 0, int $pageSize = 0, int $totalRecords = 0)
     {
         $this->items = $items;
         $this->currentPage = $currentPage;

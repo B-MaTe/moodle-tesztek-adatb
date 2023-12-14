@@ -23,6 +23,12 @@ class AuthController extends Controller
         }
     }
 
+    public static function returnHomeIfLoggedOut(): void {
+        if (!UserController::userLoggedIn()) {
+            header('Location: home');
+            exit;
+        }}
+
     public function register(): void
     {
         require_once 'app/view/register.php';

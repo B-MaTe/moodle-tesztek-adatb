@@ -11,6 +11,7 @@ class Question extends AuditedModel
     private Answer|null $goodAnswer;
     private array $wrongAnswers;
     private array $tests;
+    private Answer|null $selectedAnswer = null;
 
     /**
      * @param string $text
@@ -92,6 +93,15 @@ class Question extends AuditedModel
         $this->tests[] = $test;
     }
 
+    public function getSelectedAnswer(): ?Answer
+    {
+        return $this->selectedAnswer;
+    }
+
+    public function setSelectedAnswer(?Answer $selectedAnswer): void
+    {
+        $this->selectedAnswer = $selectedAnswer;
+    }
 
     public function getRandomizedAnswers(): array
     {
