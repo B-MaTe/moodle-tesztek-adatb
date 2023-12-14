@@ -14,15 +14,22 @@
     foreach ($page->getItems() as $item) {
         ?>
         <div class="card">
-            <form action="edit-test-name" method="post" class="text-center w-100">
-                <input type="text" name="id" value="<?php echo $item->getId(); ?>" hidden>
-                <input type="text" name="page" value="<?php echo $page->getCurrentPage(); ?>" hidden>
-                <input type="text" name="pageSize" value="<?php echo $page->getPageSize(); ?>" hidden>
-                <input id="test-title" class="no-edit text-center" type="text" name="name" value="<?php echo $item->getName(); ?>" readonly>
-                <button id="edit-title-button" class="hidden btn btn-success w-50 mx-auto m-2" type="submit">Cím mentése</button>
-            </form>
+            <?php
+            if (UserController::adminOrTeacher()) {
+                ?>
+                <form action="edit-test-name" method="post" class="text-center w-100">
+                    <input type="text" name="id" value="<?php echo $item->getId(); ?>" hidden>
+                    <input type="text" name="page" value="<?php echo $page->getCurrentPage(); ?>" hidden>
+                    <input type="text" name="pageSize" value="<?php echo $page->getPageSize(); ?>" hidden>
+                    <input id="test-title" class="no-edit text-center" type="text" name="name" value="<?php echo $item->getName(); ?>" readonly>
+                    <button id="edit-title-button" class="hidden btn btn-success w-50 mx-auto m-2" type="submit">Cím mentése</button>
+                </form>
                 <button id="toggle-title-button" class="btn btn-primary w-50 mx-auto m-2" onclick="toggleTitleEdit()">Cím szerkesztése</button>
-            <a href="test?id=<?php echo $item->getId(); ?>" class="card-link my-2">Teszt kitöltése</a>
+                <?php
+            } else {?>
+            <input id="test-title" class="no-edit text-center" type="text" name="name" value="<?php echo $item->getName(); ?>" readonly>
+            <?php }?>
+            <a href="test?id=<?php echo $item->getId(); ?>" class="card-link mt-4 mb-2">Teszt kitöltése</a>
             <?php
             if (UserController::adminOrTeacher()) {
                 ?>
