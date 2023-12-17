@@ -150,7 +150,7 @@ $summaryTestId = $summaryTestId ?? 0;
         </div>
     </div>
     <div class="card p-3 w-100">
-        <div class="card-header fs-2">Felhasználók teljesítményének összegzése</div>
+        <div class="card-header fs-2">Általános statisztikák</div>
         <div class="card-body">
             <table class="table table-striped">
                 <thead>
