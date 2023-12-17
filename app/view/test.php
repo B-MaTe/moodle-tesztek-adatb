@@ -158,6 +158,7 @@ if ($test->getId() > 0) {
 
 ?>
 
+<script src="app/static/js/question.js"></script>
 <script src="app/static/js/test.js"></script>
 
 

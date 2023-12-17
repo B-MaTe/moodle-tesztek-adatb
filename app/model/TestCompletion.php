@@ -10,6 +10,7 @@ class TestCompletion extends AuditedModel
     private int $earned_points;
     private bool $successful_completion;
     private array $questions = [];
+    private DateTime|null $started_at;
 
     /**
      * @param int $test_id
@@ -18,6 +19,7 @@ class TestCompletion extends AuditedModel
      * @param bool $successful_completion
      * @param int $id
      * @param DateTime|null $created_at
+     * @param DateTime|null $started_at
      */
     public function __construct(
         int $test_id = 0,
@@ -25,12 +27,14 @@ class TestCompletion extends AuditedModel
         int $earned_points = 0,
         bool $successful_completion = false,
         int $id = 0,
-        DateTime $created_at = null
+        DateTime $created_at = null,
+        DateTime|null $started_at = null
     ) {
         parent::__construct($id, $created_at, $created_by);
         $this->test_id = $test_id;
         $this->earned_points = $earned_points;
         $this->successful_completion = $successful_completion;
+        $this->started_at = $started_at;
     }
 
     public function getTestId(): int
@@ -76,5 +80,20 @@ class TestCompletion extends AuditedModel
     public function appendQuestion(Question $question): void
     {
         $this->questions[] = $question;
+    }
+
+    public function getStartedAt(): DateTime
+    {
+        return $this->started_at;
+    }
+
+    public function setStartedAt(DateTime $started_at): void
+    {
+        $this->started_at = $started_at;
+    }
+
+    public function sqlStarted_at(): string
+    {
+        return $this?->started_at->format('Y-m-d H:i:s');
     }
 }

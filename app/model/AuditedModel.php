@@ -28,9 +28,9 @@ abstract class AuditedModel
         return $this->created_at;
     }
 
-    public function sqlCreated_at(): string
+    public function sqlCreated_at(): ?string
     {
-        return $this->created_at->format('Y-m-d H:i:s');
+        return $this->created_at?->format('Y-m-d H:i:s');
     }
 
     public function setCreated_at(?DateTime $created_at): void

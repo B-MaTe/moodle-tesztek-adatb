@@ -5,8 +5,6 @@ namespace model;
 use DateTime;
 use enum\Role;
 
-require_once 'app/model/AuditedModel.php';
-
 class User extends AuditedModel
 {
     private ?string $email;

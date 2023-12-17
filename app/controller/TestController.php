@@ -1,6 +1,7 @@
 <?php
 
 namespace controller;
+use Cassandra\Date;
 use Database;
 use DateTime;
 use enum\NotificationType;
@@ -14,10 +15,7 @@ use model\TestCompletion;
 use util\pageable\Page;
 use util\pageable\Pageable;
 
-require_once 'app/controller/AuthController.php';
 require_once 'app/model/Test.php';
-require_once 'app/model/Question.php';
-require_once 'app/model/Answer.php';
 require_once 'app/model/TestCompletion.php';
 
 class TestController extends DataController
@@ -65,8 +63,6 @@ class TestController extends DataController
                 $completion->appendQuestion($questionWithAnswers);
             }
         }, $completions);
-
-        print_r($completions[2]);
 
         require_once 'app/view/test_statistics.php';
     }
@@ -128,6 +124,7 @@ class TestController extends DataController
             }
         };
 
+        $testCompletion->setStartedAt($_SESSION['started_at'] ?? new DateTime());
         $testCompletion->setEarnedPoints($collectedPoints);
         $testCompletion->setSuccessfulCompletion($collectedPoints >= $test->getMin_points());
 
@@ -310,9 +307,15 @@ class TestController extends DataController
 
         if ($test->getId() == 0) {
             AuthController::checkAdminOrTeacherPrivilege();
+        } else {
+            $_SESSION['started_at'] = new DateTime();
         }
 
         require_once 'app/view/test.php';
+    }
+
+    public static function getForSummary(): array {
+        return self::selectModels(Test::class, 'select id, name from tests', false);
     }
 
     private function getTestPageWithCompletions(Page $page): void {

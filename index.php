@@ -4,15 +4,20 @@
 use controller\LayoutController;
 use router\Router;
 
+require_once 'app/model/AuditedModel.php';
 require_once 'app/util/num_utils.php';
 require_once 'app/controller/Controller.php';
 require_once 'app/controller/DataController.php';
 require_once 'app/controller/NotificationController.php';
+require_once 'app/controller/AuthController.php';
 require_once 'app/controller/TestCompletionController.php';
+require_once 'app/controller/TestController.php';
 require_once 'app/controller/QuestionController.php';
 require_once 'app/controller/AnswerController.php';
 require_once 'app/controller/LayoutController.php';
 require_once 'app/controller/UserController.php';
+require_once 'app/model/Question.php';
+require_once 'app/model/Answer.php';
 require_once "app/config/db.php";
 require_once "app/config/config.php";
 require_once "app/router/Router.php";

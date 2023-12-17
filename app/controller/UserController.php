@@ -15,7 +15,7 @@ require_once 'app/enum/SqlValueType.php';
 class UserController extends DataController
 {
 
-    private static string $publicValues = 'id, email, name, role, created_at, created_by';
+    public static string $publicValues = 'id, email, name, role, created_at, created_by';
 
     public static function getAllUsers(): array {
         return self::selectModels(User::class, 'select * from users', false);
@@ -44,6 +44,23 @@ class UserController extends DataController
 
     public static function getLoggedInUser(): User|null {
         return self::userLoggedIn() ? self::getSessionUserById($_SESSION['user']['id']) : null;
+    }
+
+    public static function getUserPerformanceSummary(): array {
+        return self::selectModels(null,
+            "SELECT
+                users.email as user_email,
+                users.name as user_name,
+                COUNT(test_completions.created_by) as test_count,
+                COUNT(DISTINCT test_completions.test_id) AS completions_count,
+                CONCAT(
+                        GREATEST(ROUND(AVG(TIMESTAMPDIFF(HOUR, test_completions.created_at, test_completions.started_at)), 0), 0), ':', 
+                        LPAD(GREATEST(ROUND(AVG(TIMESTAMPDIFF(MINUTE, test_completions.created_at, test_completions.started_at)), 0), 1) % 60, 2, '0')
+                    ) AS average_time_difference,
+                CONCAT(ROUND(AVG(test_completions.successful_completion) * 100, 0), '%') as avg_successful_completion_percentage
+                FROM test_completions
+                LEFT JOIN users ON users.id = test_completions.created_by GROUP BY users.id",
+            false);
     }
 
     private static function getSessionUserById(int $id): User|null {

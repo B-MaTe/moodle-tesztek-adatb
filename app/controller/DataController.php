@@ -33,6 +33,14 @@ abstract class DataController extends Controller
                     }
                 }
 
+                if (isset($model['started_at'])) {
+                    try {
+                        $model['started_at'] = new DateTime($model['started_at']);
+                    } catch (Exception $ignored) {
+                        $model['started_at'] = null;
+                    }
+                }
+
                 if (isset($model['role'])) {
                     $model['role'] = Role::from($model['role']);
                 }

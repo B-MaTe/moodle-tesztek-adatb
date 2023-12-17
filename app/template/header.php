@@ -29,6 +29,12 @@
                     <li class="nav-item">
                         <a class="nav-link" href="test?id=0">Teszt létrehozása</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="manage-questions">Kérdések kezelése</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="statistics">Statisztika</a>
+                    </li>
                 <?php
                 }
                 ?>

@@ -21,7 +21,7 @@
                     <input type="text" name="id" value="<?php echo $item->getId(); ?>" hidden>
                     <input type="text" name="page" value="<?php echo $page->getCurrentPage(); ?>" hidden>
                     <input type="text" name="pageSize" value="<?php echo $page->getPageSize(); ?>" hidden>
-                    <input id="test-title" class="no-edit text-center" type="text" name="name" value="<?php echo $item->getName(); ?>" readonly>
+                    <input id="test-title" class="no-edit text-center" type="text" name="name" value="<?php echo $item->getName(); ?>" readonly required>
                     <button id="edit-title-button" class="hidden btn btn-success w-50 mx-auto m-2" type="submit">Cím mentése</button>
                 </form>
                 <button id="toggle-title-button" class="btn btn-primary w-50 mx-auto m-2" onclick="toggleTitleEdit()">Cím szerkesztése</button>
@@ -33,7 +33,6 @@
             <?php
             if (UserController::adminOrTeacher()) {
                 ?>
-                <a href="edit-test?id=<?php echo $item->getId(); ?>" class="card-link my-2">Teszt módosítása</a>
                 <a href="delete-test?id=<?php echo $item->getId(); ?>" class="card-link my-2">Teszt törlése</a>
             <?php
             }
