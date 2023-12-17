@@ -7,7 +7,8 @@ class Pageable
     /**
      * Default Page size.
      */
-    public const DEFAULT_PAGE_SIZE = 2;
+    public const DEFAULT_PAGE_SIZE = 4;
+    public const DEFAULT_PAGE_SIZE_QUESTIONS = 8;
     private int $pageSize;
     private int $page;
     private int $totalRecords;

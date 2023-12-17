@@ -21,10 +21,10 @@
                     <input type="text" name="id" value="<?php echo $item->getId(); ?>" hidden>
                     <input type="text" name="page" value="<?php echo $page->getCurrentPage(); ?>" hidden>
                     <input type="text" name="pageSize" value="<?php echo $page->getPageSize(); ?>" hidden>
-                    <input id="test-title" class="no-edit text-center" type="text" name="name" value="<?php echo $item->getName(); ?>" readonly required>
-                    <button id="edit-title-button" class="hidden btn btn-success w-50 mx-auto m-2" type="submit">Cím mentése</button>
+                    <input id="test-title-<?php echo $item->getId(); ?>" class="test-title no-edit text-center" type="text" name="name" value="<?php echo $item->getName(); ?>" readonly required>
+                    <button id="edit-title-button-<?php echo $item->getId(); ?>" class="hidden btn btn-success w-50 mx-auto m-2" type="submit">Cím mentése</button>
                 </form>
-                <button id="toggle-title-button" class="btn btn-primary w-50 mx-auto m-2" onclick="toggleTitleEdit()">Cím szerkesztése</button>
+                <button id="toggle-title-button-<?php echo $item->getId(); ?>" class="btn btn-primary w-50 mx-auto m-2" onclick="toggleTitleEdit(<?php echo $item->getId(); ?>)">Cím szerkesztése</button>
                 <?php
             } else {?>
             <input id="test-title" class="no-edit text-center" type="text" name="name" value="<?php echo $item->getName(); ?>" readonly>
@@ -96,11 +96,12 @@
 </nav>
 
 <script>
-    const title = document.getElementById('test-title');
-    const editTitleButton = document.getElementById('edit-title-button');
-    const toggleTitleButton = document.getElementById('toggle-title-button');
     let edit = false;
-    function toggleTitleEdit() {
+    function toggleTitleEdit(id) {
+        const title = document.getElementById(`test-title-${id}`);
+        const editTitleButton = document.getElementById(`edit-title-button-${id}`);
+        const toggleTitleButton = document.getElementById(`toggle-title-button-${id}`);
+
         if (edit) {
             title.setAttribute('readonly', 'readonly');
             title.classList.add('no-edit');

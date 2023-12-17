@@ -22,9 +22,9 @@ class QuestionController extends DataController
         require_once 'app/view/question_index.php';
     }
 
-    public function listQuestions($pageSize = Pageable::DEFAULT_PAGE_SIZE, $page = 0): void {
+    public function listQuestions($pageSize = Pageable::DEFAULT_PAGE_SIZE_QUESTIONS, $page = 0): void {
         AuthController::checkAdminOrTeacherPrivilege();
-        $pageSize = numOrDefault($pageSize, Pageable::DEFAULT_PAGE_SIZE);
+        $pageSize = numOrDefault($pageSize, Pageable::DEFAULT_PAGE_SIZE_QUESTIONS);
         $page = numOrDefault($page, 0);
 
 

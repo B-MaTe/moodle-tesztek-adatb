@@ -61,7 +61,7 @@ $completions = $completions ?? [];
                                 </div>
                             </div>
 
-                            <table class="table table-striped">
+                            <table class="table table-striped w-100">
                                 <thead>
                                 <tr class="text-center">
                                     <th scope="col">#</th>
@@ -82,17 +82,16 @@ $completions = $completions ?? [];
 
                                     ?>
                                     <tr class="text-center">
-                                        <th scope="row"><?php echo $count;?></th>
+                                        <th class="w-25" scope="row"><?php echo $count;?></th>
                                         <?php
                                         if (UserController::adminOrTeacher()) {
                                             ?>
-                                        <td><?php echo ($answer->isCorrect() ? '<i class="bi bi-check2"></i>' : '<i class="bi bi-x"></i>'); ?></td>
-
+                                        <td class="w-10"><?php echo ($answer->isCorrect() ? '<i class="bi bi-check2"></i>' : '<i class="bi bi-x"></i>'); ?></td>
                                             <?php
                                             }
                                         ?>
-                                        <td><?php echo $answer->getText(); ?></td>
-                                        <td><?php echo ($answer->getId() === $question->getSelectedAnswer()->getId() ? ($answer->isCorrect() ? '<i class="bi bi-check2-square"></i> helyes' : '<i class="bi bi-x-square"></i> helytelen' ) : ''); ?></td>
+                                        <td class="w-50"><?php echo $answer->getText(); ?></td>
+                                        <td class="w-15"><?php echo ($answer->getId() === $question->getSelectedAnswer()->getId() ? ($answer->isCorrect() ? '<i class="bi bi-check2-square"></i> helyes' : '<i class="bi bi-x-square"></i> helytelen' ) : ''); ?></td>
                                     </tr>
                                     <?php
                                 }

@@ -18,10 +18,10 @@ $page = $page ?? new Page();
                 <input type="text" name="id" value="<?php echo $item->getId(); ?>" hidden>
                 <input type="text" name="page" value="<?php echo $page->getCurrentPage(); ?>" hidden>
                 <input type="text" name="pageSize" value="<?php echo $page->getPageSize(); ?>" hidden>
-                <input id="question-title" class="no-edit text-center" type="text" name="text" value="<?php echo $item->getText(); ?>" readonly required>
-                <button id="edit-title-button" class="hidden btn btn-success w-50 mx-auto m-2" type="submit">Cím mentése</button>
+                <input id="question-title-<?php echo $item->getId(); ?>" class="question-title no-edit text-center" type="text" name="text" value="<?php echo $item->getText(); ?>" readonly required>
+                <button id="edit-title-button-<?php echo $item->getId(); ?>" class="hidden btn btn-success w-50 mx-auto m-2" type="submit">Cím mentése</button>
             </form>
-            <button id="toggle-title-button" class="btn btn-primary w-50 mx-auto m-2" onclick="toggleTitleEdit()">Cím szerkesztése</button>
+            <button id="toggle-title-button-<?php echo $item->getId(); ?>" class="btn btn-primary w-50 mx-auto m-2" onclick="toggleTitleEdit(<?php echo $item->getId(); ?>)">Cím szerkesztése</button>
             <a href="delete-question?id=<?php echo $item->getId(); ?>" class="card-link my-2">Kérdés törlése</a>
 
             <div class="created">
@@ -45,11 +45,12 @@ $page = $page ?? new Page();
     </ul>
 </nav>
 <script>
-    const title = document.getElementById('question-title');
-    const editTitleButton = document.getElementById('edit-title-button');
-    const toggleTitleButton = document.getElementById('toggle-title-button');
     let edit = false;
-    function toggleTitleEdit() {
+    function toggleTitleEdit(id) {
+        const title = document.getElementById(`question-title-${id}`);
+        const editTitleButton = document.getElementById(`edit-title-button-${id}`);
+        const toggleTitleButton = document.getElementById(`toggle-title-button-${id}`);
+
         if (edit) {
             title.setAttribute('readonly', 'readonly');
             title.classList.add('no-edit');
