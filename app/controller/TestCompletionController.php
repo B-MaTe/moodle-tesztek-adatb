@@ -40,7 +40,8 @@ class TestCompletionController extends DataController
                     LEFT JOIN users ON users.id = test_completions.created_by
                     LEFT JOIN tests ON tests.id = test_completions.test_id
                     LEFT JOIN users as owner_user ON owner_user.id = tests.created_by
-                    WHERE test_completions.test_id = ? ORDER BY users.email;", false, [SqlValueType::INT->value], [$testId]);
+                    WHERE test_completions.test_id = ? ORDER BY users.email;"
+            , false, [SqlValueType::INT->value], [$testId]);
     }
 
     public static function getTestResultsSummary()

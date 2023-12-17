@@ -24,7 +24,7 @@ class TestController extends DataController
     {
         AuthController::returnHomeIfLoggedOut();
 
-        $page = $this->getActivePageable(Pageable::builder()->withPageSize(PHP_INT_MAX)->withPage(0)->withTotalRecords($this->count(Test::class))->build());
+        $page = $this->getPageable(Pageable::builder()->withPageSize(PHP_INT_MAX)->withPage(0)->withTotalRecords($this->count(Test::class))->build());
 
         self::getTestPageWithCompletions($page);
         require_once 'app/view/tests.php';
@@ -35,7 +35,7 @@ class TestController extends DataController
 
         $pageSize = numOrDefault($pageSize, Pageable::DEFAULT_PAGE_SIZE);
         $page = numOrDefault($page, 0);
-        $page = $this->getActivePageable(
+        $page = $this->getPageable(
             Pageable::builder()
                 ->withPageSize($pageSize)
                 ->withPage($page)->withTotalRecords($this->count(Test::class, true))
@@ -166,7 +166,6 @@ class TestController extends DataController
         $currentUserId = UserController::getLoggedInUser()->getId();
         $model = new Test();
         $model->setName($test['title']);
-        $model->setActive(true);
         $model->setMin_points($test['min_points']);
         $model->setCreated_at(new DateTime());
         $model->setCreated_by($currentUserId);
@@ -280,7 +279,6 @@ class TestController extends DataController
                     tests.id AS test_id,
                     tests.name AS test_name,
                     tests.min_points AS test_min_points,
-                    tests.active AS test_active,
                     tests.created_at AS test_created_at,
                     tests.created_by AS test_created_by,
                     questions.id AS question_id,
@@ -299,7 +297,7 @@ class TestController extends DataController
                 LEFT JOIN
                     answers ON questions.id = answers.question_id
                 WHERE
-                    tests.id = ? AND tests.active = true;',
+                    tests.id = ?;',
         false, [SqlValueType::INT->value], [$id]);
         }
 
@@ -336,10 +334,10 @@ class TestController extends DataController
         $page->setItems($items);
     }
 
-    private function getActivePageable(Pageable $pageable): Page {
+    private function getPageable(Pageable $pageable): Page {
         $page = new Page([], $pageable->getPage(), $pageable->getPageSize(), $pageable->getTotalRecords());
 
-        $pageSql = 'select * from tests where active = true ORDER BY id LIMIT ?, ?';
+        $pageSql = 'select * from tests ORDER BY id LIMIT ?, ?';
 
         $page->setItems(self::selectModels(Test::class, $pageSql, false, [SqlValueType::INT->value, SqlValueType::INT->value], [$pageable->getOffset(), $pageable->getPageSize()]));
         return $page;
@@ -357,7 +355,6 @@ class TestController extends DataController
                 $test = new Test(
                     $row['test_name'],
                     $row['test_min_points'],
-                    $row['test_active'],
                     [],
                     new DateTime($row['test_created_at']),
                     $row['test_created_by'],
@@ -401,9 +398,9 @@ class TestController extends DataController
 
     public static function save(Test|AuditedModel $model): int
     {
-        $id = Database::insert('insert into tests (name, min_points, active, created_by, created_at) values (?, ?, ?, ?, ?)',
-        [SqlValueType::STRING->value, SqlValueType::INT->value, SqlValueType::INT->value, SqlValueType::INT->value, SqlValueType::STRING->value],
-        [$model->getName(), $model->getMin_points(), $model->isActive(), $model->getCreated_by(), $model->sqlCreated_at()]);
+        $id = Database::insert('insert into tests (name, min_points, created_by, created_at) values (?, ?, ?, ?)',
+        [SqlValueType::STRING->value, SqlValueType::INT->value, SqlValueType::INT->value, SqlValueType::STRING->value],
+        [$model->getName(), $model->getMin_points(), $model->getCreated_by(), $model->sqlCreated_at()]);
 
         $model->setId($id);
         foreach ($model->getQuestions() as $question) {

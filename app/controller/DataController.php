@@ -52,8 +52,8 @@ abstract class DataController extends Controller
         return $single ? ($models[0] ?? null) : $models;
     }
 
-    public static function count($model, bool $onlyActive = false): int {
-        $sql = 'select count(*) from ' . self::getTableFromModel($model) . ($onlyActive ? ' where active = 1 ' : ' ');
+    public static function count($model): int {
+        $sql = 'select count(*) from ' . self::getTableFromModel($model);
 
         return Database::query($sql, [], [])->fetch_row()[0];
     }
